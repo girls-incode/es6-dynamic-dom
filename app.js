@@ -1,6 +1,6 @@
 'use strict';
 
-var log = console.log.bind(console);
+let log = console.log.bind(console);
 
 function createBlock(data, field, className) {
     let block = document.createElement("div");
@@ -17,7 +17,7 @@ function createComments(comments, listItem, num) {
 
     listItem.innerHTML = '';
     
-    for (let i=0; i<num; i++) {
+    for (let i = 0; i < num; i++) {
         let commentItem = document.createElement("div");
         commentItem.className = className;
         
@@ -28,29 +28,29 @@ function createComments(comments, listItem, num) {
     }
 }
 
+async function fetchData(endpoint) {
+    const res = await fetch(endpoint);
+    const data = await res.json();
+    return data;
+}
+
 function getComments() {
     let lists = document.querySelectorAll(".comment-list");
 
-    lists.forEach(async (item) => {
+    lists.forEach(item => {
         let num = Number(item.getAttribute("data-count")) || 0;
-        let data, comments = [];
 
         if (num) {
             item.innerHTML = "Loading...";
-            try {
-                // normally the url is an api endpoint
-                data = await fetch('data.json');
-                comments = await data.json();
+            
+            fetchData('data.json').then(comments => {
                 // simulate a failure
-                if (num == 2) throw Error('ups...');
-                if (comments) {
-                   createComments(comments, item, num)
-                }
-            }
-            catch(err) {
+                // if (num == 2) throw Error('ups...');
+                createComments(comments, item, num)
+            }).catch(err => {
                 item.innerHTML = '';
                 log(err.message);
-            }
+            })
         }
     })
 }
